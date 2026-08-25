@@ -5,6 +5,7 @@ import com.example.support_faq_service.domain.dto.FaqResponse;
 import com.example.support_faq_service.domain.entity.Faq;
 import com.example.support_faq_service.domain.repository.FaqRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +42,7 @@ public class FaqService {
     }
 
     // 조회수 상위 10개 인기 FAQ 조회
+    @Cacheable(value = "popularFaqs", key = "'top10'")
     public List<FaqResponse> getTopPopularFaqs() {
         return faqRepository.findTop10ByOrderByViewCntDesc()
                 .stream()
