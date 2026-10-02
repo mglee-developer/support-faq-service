@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface SearchHistoryRepository extends JpaRepository<SearchHistory, Long> {
     // 최근 검색 이력 조회
-    List<SearchHistory> findByOrderByCreatedAtDesc();
+    List<SearchHistory> findBySessionIdOrderByCreatedAtDesc(String sessionId);
 }

@@ -18,8 +18,8 @@ public class SearchHistoryController {
 
     // 최근 검색/대화 이력 조회
     @GetMapping
-    public ResponseEntity<List<SearchHistoryResponse>> getRecentSearchHistories() {
-        List<SearchHistoryResponse> response = searchHistoryService.getRecentSearchHistories();
+    public ResponseEntity<List<SearchHistoryResponse>> getRecentSearchHistories(String sessionId) {
+        List<SearchHistoryResponse> response = searchHistoryService.getRecentSearchHistories(sessionId);
         return ResponseEntity.ok(response);
     }
 }

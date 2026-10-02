@@ -11,12 +11,14 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class SearchHistoryResponse {
     private Long id;
+    private String sessionId;
     private String userQuery;
     private String aiResponse;
     private LocalDateTime createdAt;
 
     public SearchHistoryResponse(SearchHistory searchHistory) {
         this.id = searchHistory.getId();
+        this.sessionId = searchHistory.getSessionId();
         this.userQuery = searchHistory.getUserQuery();
         this.aiResponse = searchHistory.getAiResponse();
         this.createdAt = searchHistory.getCreatedAt();

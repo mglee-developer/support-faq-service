@@ -31,6 +31,18 @@ public class FaqController {
         return ResponseEntity.ok(response);
     }
 
+    // FAQ 상세 조회
+    @GetMapping("/{faqId}")
+    public ResponseEntity<FaqResponse> getFaq(
+            @PathVariable Long faqId
+    ) {
+
+        FaqResponse response =
+                faqService.getFaq(faqId);
+
+        return ResponseEntity.ok(response);
+    }
+
     // 인기 FAQ 상위 10개 조회
     @GetMapping("/popular")
     public ResponseEntity<List<FaqResponse>> getTopPopularFaqs() {

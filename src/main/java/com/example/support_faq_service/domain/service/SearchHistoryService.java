@@ -17,9 +17,10 @@ public class SearchHistoryService {
 
     // 검색/질문 이력 저장
     @Transactional
-    public void saveSearchHistory(String userQuery, String aiResponse) {
+    public void saveSearchHistory(String sessionId, String userQuery, String aiResponse) {
         SearchHistory searchHistory = SearchHistory
                                     .builder()
+                                    .sessionId(sessionId)
                                     .userQuery(userQuery)
                                     .aiResponse(aiResponse)
                                     .build();
@@ -27,8 +28,8 @@ public class SearchHistoryService {
     }
 
     // 최근 검색 이력 목록 조회
-    public List<SearchHistoryResponse> getRecentSearchHistories() {
-        return searchHistoryRepository.findByOrderByCreatedAtDesc()
+    public List<SearchHistoryResponse> getRecentSearchHistories(String sessionId) {
+        return searchHistoryRepository.findBySessionIdOrderByCreatedAtDesc(sessionId)
                 .stream()
                 .map(SearchHistoryResponse::new)
                 .toList();

@@ -4,9 +4,7 @@ import com.example.support_faq_service.domain.dto.ChatRequest;
 import com.example.support_faq_service.domain.dto.ChatResponse;
 import com.example.support_faq_service.domain.dto.FaqResponse;
 import com.example.support_faq_service.domain.repository.FaqRepository;
-import com.example.support_faq_service.domain.repository.SearchHistoryRepository;
 import com.example.support_faq_service.infrastructure.client.LlmClient;
-import io.micrometer.core.instrument.search.Search;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,7 +44,7 @@ public class ChatService {
             String aiResponse = llmClient.generateAnswer(systemPrompt, userQuery);
 
             // 5. 질문 및 AI 답변 이력 저장
-            searchHistoryService.saveSearchHistory(userQuery, aiResponse);
+            searchHistoryService.saveSearchHistory(sessionId, userQuery, aiResponse);
 
             return ChatResponse.builder()
                     .sessionId(sessionId)
@@ -56,7 +54,7 @@ public class ChatService {
                     .build();
         } catch(Exception e) {
             // 6. LLM 호출 중 에러 발생 시 Fallback 처리
-            return createFallbackResponse(sessionId, userQuery);
+            return createFallbackResponse(sessionId, userQuery, referencedFaqs);
         }
     }
 
@@ -72,17 +70,31 @@ public class ChatService {
         return sb.toString();
     }
 
-    // Fallback 응답 생성 및 이력 저장 메서드
+    // FAQ 자체가 검색되지 않은 경우
     private ChatResponse createFallbackResponse(String sessionId, String userQuery) {
         String fallbackMsg = "죄송합니다. 요청하신 질문에 관련된 FAQ를 찾을 수 없거나 AI 서비스 연동이 지연되고 있습니다."
                 + " 정확한 안내를 위해 1:1 문의 접수를 진행해 주세요.";
 
-        searchHistoryService.saveSearchHistory(userQuery, "[Fallback] " + fallbackMsg);
+        searchHistoryService.saveSearchHistory(sessionId, userQuery, "[Fallback] " + fallbackMsg);
 
         return ChatResponse.builder()
                 .sessionId(sessionId)
                 .aiResponse(fallbackMsg)
                 .referencedFaqs(List.of())
+                .isFallback(true)
+                .build();
+    }
+
+    // FAQ는 존재하지만 LLM 서비스에 장애가 발생한 경우
+    private ChatResponse createFallbackResponse(String sessionId, String userQuery, List<FaqResponse> referencedFaqs) {
+        String fallbackMsg = "현재 AI 답변 서비스가 일시적으로 지연되고 있습니다."
+                            + "잠시 후 다시 시도해 주세요.";
+        searchHistoryService.saveSearchHistory(sessionId, userQuery, "[LLM_UNAVAILABLE]" + fallbackMsg);
+
+        return ChatResponse.builder()
+                .sessionId(sessionId)
+                .aiResponse(fallbackMsg)
+                .referencedFaqs(referencedFaqs)
                 .isFallback(true)
                 .build();
     }

@@ -5,6 +5,7 @@ import com.example.support_faq_service.domain.dto.FaqResponse;
 import com.example.support_faq_service.domain.entity.Faq;
 import com.example.support_faq_service.domain.repository.FaqRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,7 @@ public class FaqService {
 
     // 신규 FAQ 등록
     @Transactional
+    @CacheEvict(value = "popularFaqs", key="'top10'")
     public FaqResponse createFaq(FaqCreateRequest request) {
         Faq faq = Faq.builder()
                 .category(request.getCategory())
@@ -41,6 +43,22 @@ public class FaqService {
                 .toList();
     }
 
+    // FAQ 상세 조회 + 조회수 증가
+    @Transactional
+    public FaqResponse getFaq(Long faqId) {
+
+        Faq faq = faqRepository.findById(faqId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "FAQ를 찾을 수 없습니다. id=" + faqId
+                        )
+                );
+
+        faq.increaseViewCnt();
+
+        return new FaqResponse(faq);
+    }
+
     // 조회수 상위 10개 인기 FAQ 조회
     @Cacheable(value = "popularFaqs", key = "'top10'")
     public List<FaqResponse> getTopPopularFaqs() {
@@ -51,9 +69,13 @@ public class FaqService {
     }
 
     // 키워드 검색 및 조회수 증가
+    @Transactional
     public List<FaqResponse> searchFaqsByKeyword(String keyword) {
-        return faqRepository.findByQuestionContaining(keyword)
-                .stream()
+        List<Faq> faqs = faqRepository.findByQuestionContaining(keyword);
+        // 검색된 FAQ 조회수 증가
+        faqs.forEach(Faq::increaseViewCnt);
+
+        return faqs.stream()
                 .map(FaqResponse::new)
                 .toList();
     }

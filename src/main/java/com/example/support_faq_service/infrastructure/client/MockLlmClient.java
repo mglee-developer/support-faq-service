@@ -1,11 +1,12 @@
 package com.example.support_faq_service.infrastructure.client;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.stereotype.Service;
 
 @Service
 public class MockLlmClient implements LlmClient {
-
     @Override
+    @CircuitBreaker(name = "llmClient")
     public String generateAnswer(String systemPrompt, String userQuery) {
         // 1. 테스트용 에러 분기
         // 나중에 fallback(1:1 문의 안내) 로직을 테스트하기 위해
