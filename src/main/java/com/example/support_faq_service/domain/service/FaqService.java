@@ -68,12 +68,10 @@ public class FaqService {
                 .toList();
     }
 
-    // 키워드 검색 및 조회수 증가
+    // 키워드 검색
     @Transactional
     public List<FaqResponse> searchFaqsByKeyword(String keyword) {
         List<Faq> faqs = faqRepository.findByQuestionContaining(keyword);
-        // 검색된 FAQ 조회수 증가
-        faqs.forEach(Faq::increaseViewCnt);
 
         return faqs.stream()
                 .map(FaqResponse::new)

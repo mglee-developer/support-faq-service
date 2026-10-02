@@ -7,14 +7,12 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Entity
 @Table(name = "faq")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@Builder
 @EntityListeners(AuditingEntityListener.class)
 public class Faq {
     @Id
@@ -41,6 +39,19 @@ public class Faq {
     @Column(nullable = false)
     @LastModifiedDate
     private LocalDateTime updatedAt;
+
+    @Builder
+    public Faq(
+            String category,
+            String question,
+            String answer,
+            Integer viewCnt
+    ) {
+        this.category = category;
+        this.question = question;
+        this.answer = answer;
+        this.viewCnt = viewCnt;
+    }
 
     // 조회수 증가 비즈니스 메서드
     public void increaseViewCnt() {

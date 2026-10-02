@@ -51,6 +51,7 @@ public class FaqController {
     }
 
     // 키워드 FAQ 검색
+    @GetMapping("/search")
     public ResponseEntity<List<FaqResponse>> searchFaqsByKeyword(@RequestParam String keyword) {
         List<FaqResponse> response = faqService.searchFaqsByKeyword(keyword);
         return ResponseEntity.ok(response);
